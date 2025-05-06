@@ -4,8 +4,8 @@ import { connect, StringCodec } from 'nats.ws';
 const BACKEND_URL = 'https://server-4t18pf67v-varachkins-projects.vercel.app/'; // ← замени на свой адрес
 
 function App() {
-    const [message, setMessage] = useState('');
-    const [received, setReceived] = useState([]);
+    const [message, setMessage] = useState<any>('');
+    const [received, setReceived] = useState<any[]>([]);
 
     useEffect(() => {
         (async () => {
