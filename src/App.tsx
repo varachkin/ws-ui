@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect, StringCodec } from 'nats.ws';
 
 const BACKEND_URL = 'https://server-4t18pf67v-varachkins-projects.vercel.app/'; // ← замени на свой адрес
