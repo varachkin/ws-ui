@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { connect, StringCodec } from 'nats.ws';
 
-const BACKEND_URL: string = 'https://server-smoky-eight.vercel.app';
+const BACKEND_URL: string = 'https://server-4t18pf67v-varachkins-projects.vercel.app/';
 
 function App() {
     const [message, setMessage] = useState<string>('');
