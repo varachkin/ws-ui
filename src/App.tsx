@@ -52,7 +52,9 @@ function App() {
     const [inputMessage, setInputMessage] = useState<string>('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [ws, setWs] = useState<WebSocket | null>(null);
+    const [intervalId, setIntervalId] = useState<any>(null)
     const [isConnected, setIsConnected] = useState<string | null>(null)
+    const [isError, setIsError] = useState<string | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const listContainerRef = useRef<HTMLDivElement>(null);
 
@@ -60,12 +62,13 @@ function App() {
         setSide(event.target.value as string);
     };
 
-    useEffect(() => {
+    const handleConnect = ()=> {
         const socket = new WebSocket(WEB_SOCKET_URL);
         setWs(socket);
 
         socket.onopen = () => {
             setIsConnected('Connected')
+            setIsError(null);
             console.log('WebSocket connected');
         };
 
@@ -75,23 +78,37 @@ function App() {
         };
 
         socket.onerror = (error) => {
+            setIsError('WebSocket error');
             console.error('WebSocket error:', error);
         };
 
         socket.onclose = () => {
+            setIsConnected(null)
             console.log('WebSocket disconnected');
         };
+    }
+
+    useEffect(() => {
+        const id = setInterval(handleConnect, 5000)
+        setIntervalId(id);
 
         return () => {
-            socket.close();
+            ws?.close();
             setIsConnected(null)
+            setIsError(null)
         };
     }, []);
 
     useEffect(() => {
+        if(isConnected){
+            clearInterval(intervalId)
+        }
+    }, [isConnected]);
+
+    useEffect(() => {
         // Only scroll if user hasn't manually scrolled up
         if (shouldScrollToBottom()) {
-            smoothScrollToBottom();
+            setTimeout(smoothScrollToBottom, 1000);
         }
     }, [messages]);
 
@@ -157,6 +174,9 @@ function App() {
                     <Typography variant="h6" component="h6" gutterBottom textAlign={'center'} color={'success'}>
                         {isConnected}
                     </Typography>
+                    {isError && <Typography variant="h6" component="h6" gutterBottom textAlign={'center'} color={'error'}>
+                        {isError}
+                    </Typography>}
 
                     <FormControl fullWidth sx={{ mb: 2 }}>
                         <InputLabel id="side-select-label">Side</InputLabel>
@@ -166,6 +186,7 @@ function App() {
                             value={side}
                             label="Side"
                             onChange={handleSideChange}
+                            disabled={isError || !isConnected}
                         >
                             <MenuItem value={'left'}>Left</MenuItem>
                             <MenuItem value={'right'}>Right</MenuItem>
@@ -175,6 +196,7 @@ function App() {
 
                     <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
                         <TextField
+                            disabled={isError || !isConnected}
                             fullWidth
                             variant="outlined"
                             value={inputMessage}
@@ -183,7 +205,7 @@ function App() {
                             placeholder="Write a message"
                         />
                         <Button
-                            disabled={!isConnected}
+                            disabled={!isConnected || isError || !inputMessage}
                             variant="contained"
                             onClick={sendMessage}
                             sx={{ minWidth: 120, fontWeight: 600 }}
